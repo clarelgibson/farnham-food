@@ -10,7 +10,7 @@ library(tidyr)
 library(dplyr)
 
 # READ DATA ####################################################################
-fhr_path <- "data/src/FHRS314en-GB.xml"
+fhr_path <- here("data/src/FHRS314en-GB.xml")
 
 # Read in the XML as an R list
 fhr_xml <- as_list(read_xml(fhr_path))

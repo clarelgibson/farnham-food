@@ -1,0 +1,74 @@
+---
+title: "Farnham Food Hygiene Ratings"
+subtitle: "Data Profiling"
+author: "Clare Gibson"
+output:
+  github_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+# Knitr chunk options
+knitr::opts_chunk$set(
+	echo = TRUE,
+	fig.align = "center",
+	message = FALSE,
+	warning = FALSE
+)
+
+# Knit options
+knitr::opts_knit$set(
+  root.dir = "../"
+)
+```
+
+# Packages
+
+Load the packages to be used for this project.
+```{r load-packages}
+library(here)
+library(knitr)
+```
+
+# Load the data
+
+The data for profiling is contained in the `fhr` object created in the [`2-prep-data.R`](script/2-prep-data.R) script.
+
+```{r load-data}
+# Load data
+source(here("script/2-prep-data.R"))
+
+# Check that data has loaded
+head(fhr_data) %>% 
+  kable()
+```
+
+# Dataframe profile
+The dataframe has `r nrow(fhr_data)` rows and `r ncol(fhr_data)` columns. A `glimpse` of the data is shown below.
+
+```{r glimpse-data}
+# Glimpse data
+glimpse(fhr_data)
+```
+
+# Column profiling
+Look at each column in turn and assess the number of unique values. Is any recoding required?
+
+## `fhrsid`
+```{r fhrsid-profile}
+# How many unique values?
+length(unique(fhr_data$fhrsid))
+```
+This is an ID column with no duplicates.
+
+## `local_authority_business_id`
+```{r local-authority-business-id-profile}
+# How many unique values?
+length(unique(fhr_data$local_authority_business_id))
+```
+
+This is an ID column with no duplicates.
+
+# Cleaning requirements identified
+- Records with missing location data should be removed. These records refer to establishments that are run from a private address. There are `r fhr_data %>% filter(is.na(longitude)) %>% nrow()` such records in the dataset, representing `r round(((fhr_data %>% filter(is.na(longitude)) %>% nrow()) / nrow(fhr_data))*100)`% of the total.
