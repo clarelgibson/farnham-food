@@ -1,6 +1,5 @@
 ---
 title: "Farnham Food Hygiene Ratings"
-subtitle: "Data Profiling"
 author: "Clare Gibson"
 output:
   github_document:
@@ -8,10 +7,13 @@ output:
     toc_depth: 2
 ---
 
+# Introduction
+This script outlines the steps take to profile the data from the Food Hygiene Ratings dataset. This script will not make any edits to the data but will note down where cleaning actions should be taken so that this can be performed with an R script in the overall pipeline.
+
 ```{r setup, include=FALSE}
 # Knitr chunk options
 knitr::opts_chunk$set(
-	echo = TRUE,
+	echo = FALSE,
 	fig.align = "center",
 	message = FALSE,
 	warning = FALSE
@@ -26,9 +28,10 @@ knitr::opts_knit$set(
 # Packages
 
 Load the packages to be used for this project.
-```{r load-packages}
+```{r load-packages, echo=TRUE}
 library(here)
 library(knitr)
+library(ggplot2)
 ```
 
 # Load the data
@@ -56,19 +59,122 @@ glimpse(fhr_data)
 Look at each column in turn and assess the number of unique values. Is any recoding required?
 
 ## `fhrsid`
-```{r fhrsid-profile}
-# How many unique values?
-length(unique(fhr_data$fhrsid))
-```
-This is an ID column with no duplicates.
+- There are `r length(unique(fhr_data$fhrsid))` unique values.
+- This is an ID column with no duplicates.
 
 ## `local_authority_business_id`
-```{r local-authority-business-id-profile}
-# How many unique values?
-length(unique(fhr_data$local_authority_business_id))
+- There are `r length(unique(fhr_data$local_authority_business_id))` unique values
+- This is an ID column with no duplicates.
+
+## `business_name`
+- There are `r length(unique(fhr_data$business_name))` unique values.
+- Be aware there are some duplicated business names.
+
+## `business_type`
+- There are `r length(unique(fhr_data$business_type))` unique values.
+```{r business-type-profile}
+# What are the unique values?
+values_business_type <- fhr_data %>% 
+  count(business_type) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_business_type %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
 ```
 
-This is an ID column with no duplicates.
+## `business_type_id`
+There are `r length(unique(fhr_data$business_type_id))` unique values.
+```{r business-type-id-profile}
+# What are the unique values?
+values_business_type_id <- fhr_data %>% 
+  count(business_type_id) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_business_type_id %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+
+## `rating_value`
+- There are `r length(unique(fhr_data$rating_value))` unique values.
+```{r rating-value-profile}
+# What are the unique values?
+values_rating_value <- fhr_data %>% 
+  count(rating_value) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_rating_value %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+- Note the mix of character and numeric. Could we remove character?
+
+## `rating_key`
+- There are `r length(unique(fhr_data$rating_key))` unique values.
+```{r rating-key-profile}
+# What are the unique values?
+values_rating_key <- fhr_data %>% 
+  count(rating_key) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_rating_key %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+- This column supplements the `rating_value` column nicely. We probably don't need to add another column.
+
+## `rating_date`
+- There are `r length(unique(fhr_data$rating_date))` unique values.
+- Earliest date is `r min(fhr_data$rating_date, na.rm = TRUE)`
+- Latest date is `r max(fhr_data$rating_date, na.rm = TRUE)`
+```{r rating-date-profile}
+# Summary of values
+summary(fhr_data$rating_date)
+```
+
+## `local_authority_code`
+- There is `r length(unique(fhr_data$local_authority_code))` unique value.
+- This should be treated as metadata since the same value applies to every record.
+
+## `local_authority_name`
+- There is `r length(unique(fhr_data$local_authority_name))` unique value.
+- This should be treated as metadata since the same value applies to every record.
+
+## `local_authority_web_site`
+- There is `r length(unique(fhr_data$local_authority_web_site))` unique value.
+- This should be treated as metadata since the same value applies to every record.
+
+## `local_authority_email_address`
+- There is `r length(unique(fhr_data$local_authority_email_address))` unique value.
+- This should be treated as metadata since the same value applies to every record.
+
+## `hygiene`
+- There are `r length(unique(fhr_data$hygiene))` unique values.
+```{r hygiene-profile}
+# What are the unique values?
+values_hygiene <- fhr_data %>% 
+  count(hygiene) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_hygiene %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+- This column is part of the `score` tag in the original xml file.
 
 # Cleaning requirements identified
 - Records with missing location data should be removed. These records refer to establishments that are run from a private address. There are `r fhr_data %>% filter(is.na(longitude)) %>% nrow()` such records in the dataset, representing `r round(((fhr_data %>% filter(is.na(longitude)) %>% nrow()) / nrow(fhr_data))*100)`% of the total.
+- `rating_value` has a mix of character and numeric values. Look at keeping a single type in the column (perhaps split data into 2 columns, one for numeric rating and one for rating code.)
+- Add the following fields to metadata since the same value is used for every record: `local_authority_code`, `local_authority_name`, `local_authority_web_site`, `local_authority_email_address`.
+- Append `_score` to the following columns: `hygiene`, `structural`, `confidence_in_management` (abbreviated to `management`)
