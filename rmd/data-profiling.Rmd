@@ -1,0 +1,22 @@
+---
+title: "Farnham Food Hygiene Ratings"
+subtitle: "Data Profiling"
+author: "Clare Gibson"
+output:
+  github_document:
+    toc: true
+    toc_depth: 2
+---
+
+# Packages
+
+# Load the data
+
+The data for profiling is contained in the `fhr` object created in the [`2-prep-data.R`](../r/2-prep-data.R) script.
+
+```{r load-data}
+# Load data
+head(fhr)
+```
+
+# Dataframe profile
