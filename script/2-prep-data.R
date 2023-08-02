@@ -4,10 +4,11 @@
 
 # SETUP ########################################################################
 # > Scripts ====================================================================
-source("r/1-get-data.R")
+source(here("script/1-get-data.R"))
 
 # > Packages ===================================================================
 library(janitor)
+library(readr)
 
 # PARSE DATA ###################################################################
 # Convert to tibble by highest required xml tag
@@ -45,3 +46,6 @@ fhr_data <- fhr_df %>%
   # fix the types and headers
   type_convert() %>% 
   clean_names()
+
+# SAVE DATA ####################################################################
+#saveRDS()
