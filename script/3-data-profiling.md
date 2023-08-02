@@ -2,13 +2,32 @@ Farnham Food Hygiene Ratings
 ================
 Clare Gibson
 
+- [Introduction](#introduction)
 - [Packages](#packages)
 - [Load the data](#load-the-data)
 - [Dataframe profile](#dataframe-profile)
 - [Column profiling](#column-profiling)
   - [`fhrsid`](#fhrsid)
   - [`local_authority_business_id`](#local_authority_business_id)
+  - [`business_name`](#business_name)
+  - [`business_type`](#business_type)
+  - [`business_type_id`](#business_type_id)
+  - [`rating_value`](#rating_value)
+  - [`rating_key`](#rating_key)
+  - [`rating_date`](#rating_date)
+  - [`local_authority_code`](#local_authority_code)
+  - [`local_authority_name`](#local_authority_name)
+  - [`local_authority_web_site`](#local_authority_web_site)
+  - [`local_authority_email_address`](#local_authority_email_address)
+  - [`hygiene`](#hygiene)
 - [Cleaning requirements identified](#cleaning-requirements-identified)
+
+# Introduction
+
+This script outlines the steps take to profile the data from the Food
+Hygiene Ratings dataset. This script will not make any edits to the data
+but will note down where cleaning actions should be taken so that this
+can be performed with an R script in the overall pipeline.
 
 # Packages
 
@@ -17,21 +36,13 @@ Load the packages to be used for this project.
 ``` r
 library(here)
 library(knitr)
+library(ggplot2)
 ```
 
 # Load the data
 
 The data for profiling is contained in the `fhr` object created in the
 [`2-prep-data.R`](script/2-prep-data.R) script.
-
-``` r
-# Load data
-source(here("script/2-prep-data.R"))
-
-# Check that data has loaded
-head(fhr_data) %>% 
-  kable()
-```
 
 |  fhrsid | local_authority_business_id | business_name           | business_type           | business_type_id | rating_value | rating_key   | rating_date | local_authority_code | local_authority_name | local_authority_web_site     | local_authority_email_address         | hygiene | structural | confidence_in_management | scheme_type | new_rating_pending | longitude | latitude | address_line1          | address_line2 | address_line3 | address_line4 | post_code | fhrs_establishment_id |
 |--------:|:----------------------------|:------------------------|:------------------------|-----------------:|:-------------|:-------------|:------------|---------------------:|:---------------------|:-----------------------------|:--------------------------------------|--------:|-----------:|-------------------------:|:------------|:-------------------|----------:|---------:|:-----------------------|:--------------|:--------------|:--------------|:----------|:----------------------|
@@ -46,11 +57,6 @@ head(fhr_data) %>%
 
 The dataframe has 982 rows and 25 columns. A `glimpse` of the data is
 shown below.
-
-``` r
-# Glimpse data
-glimpse(fhr_data)
-```
 
     ## Rows: 982
     ## Columns: 25
@@ -87,28 +93,155 @@ any recoding required?
 
 ## `fhrsid`
 
-``` r
-# How many unique values?
-length(unique(fhr_data$fhrsid))
-```
-
-    ## [1] 982
-
-This is an ID column with no duplicates.
+- There are 982 unique values.
+- This is an ID column with no duplicates.
 
 ## `local_authority_business_id`
 
-``` r
-# How many unique values?
-length(unique(fhr_data$local_authority_business_id))
-```
+- There are 982 unique values
+- This is an ID column with no duplicates.
 
-    ## [1] 982
+## `business_name`
 
-This is an ID column with no duplicates.
+- There are 939 unique values.
+- Be aware there are some duplicated business names.
+
+## `business_type`
+
+- There are 13 unique values.
+
+| business_type                         |   n | prop |
+|:--------------------------------------|----:|-----:|
+| Restaurant/Cafe/Canteen               | 188 | 0.19 |
+| Other catering premises               | 179 | 0.18 |
+| Retailers - other                     | 153 | 0.16 |
+| Hospitals/Childcare/Caring Premises   | 110 | 0.11 |
+| Pub/bar/nightclub                     |  95 | 0.10 |
+| School/college/university             |  82 | 0.08 |
+| Takeaway/sandwich shop                |  52 | 0.05 |
+| Mobile caterer                        |  50 | 0.05 |
+| Manufacturers/packers                 |  28 | 0.03 |
+| Hotel/bed & breakfast/guest house     |  20 | 0.02 |
+| Retailers - supermarkets/hypermarkets |  19 | 0.02 |
+| Distributors/Transporters             |   5 | 0.01 |
+| Farmers/growers                       |   1 | 0.00 |
+
+## `business_type_id`
+
+There are 13 unique values.
+
+| business_type_id |   n | prop |
+|-----------------:|----:|-----:|
+|                1 | 188 | 0.19 |
+|             7841 | 179 | 0.18 |
+|             4613 | 153 | 0.16 |
+|                5 | 110 | 0.11 |
+|             7843 |  95 | 0.10 |
+|             7845 |  82 | 0.08 |
+|             7844 |  52 | 0.05 |
+|             7846 |  50 | 0.05 |
+|             7839 |  28 | 0.03 |
+|             7842 |  20 | 0.02 |
+|             7840 |  19 | 0.02 |
+|                7 |   5 | 0.01 |
+|             7838 |   1 | 0.00 |
+
+## `rating_value`
+
+- There are 8 unique values.
+
+| rating_value       |   n | prop |
+|:-------------------|----:|-----:|
+| 5                  | 729 | 0.74 |
+| 4                  | 116 | 0.12 |
+| 3                  |  58 | 0.06 |
+| Exempt             |  43 | 0.04 |
+| 2                  |  16 | 0.02 |
+| 1                  |  12 | 0.01 |
+| AwaitingInspection |   7 | 0.01 |
+| 0                  |   1 | 0.00 |
+
+- Note the mix of character and numeric. Could we remove character?
+
+## `rating_key`
+
+- There are 8 unique values.
+
+| rating_key                    |   n | prop |
+|:------------------------------|----:|-----:|
+| fhrs_5_en-GB                  | 729 | 0.74 |
+| fhrs_4_en-GB                  | 116 | 0.12 |
+| fhrs_3_en-GB                  |  58 | 0.06 |
+| fhrs_exempt_en-GB             |  43 | 0.04 |
+| fhrs_2_en-GB                  |  16 | 0.02 |
+| fhrs_1_en-GB                  |  12 | 0.01 |
+| fhrs_awaitinginspection_en-GB |   7 | 0.01 |
+| fhrs_0_en-GB                  |   1 | 0.00 |
+
+- This column supplements the `rating_value` column nicely. We probably
+  don’t need to add another column.
+
+## `rating_date`
+
+- There are 389 unique values.
+- Earliest date is 2016-01-22
+- Latest date is 2023-07-19
+
+<!-- -->
+
+    ##         Min.      1st Qu.       Median         Mean      3rd Qu.         Max. 
+    ## "2016-01-22" "2022-02-11" "2022-07-01" "2022-07-04" "2023-01-20" "2023-07-19" 
+    ##         NA's 
+    ##          "7"
+
+## `local_authority_code`
+
+- There is 1 unique value.
+- This should be treated as metadata since the same value applies to
+  every record.
+
+## `local_authority_name`
+
+- There is 1 unique value.
+- This should be treated as metadata since the same value applies to
+  every record.
+
+## `local_authority_web_site`
+
+- There is 1 unique value.
+- This should be treated as metadata since the same value applies to
+  every record.
+
+## `local_authority_email_address`
+
+- There is 1 unique value.
+- This should be treated as metadata since the same value applies to
+  every record.
+
+## `hygiene`
+
+- There are 5 unique values.
+
+| hygiene |   n | prop |
+|--------:|----:|-----:|
+|       0 | 587 | 0.60 |
+|       5 | 241 | 0.25 |
+|      10 |  94 | 0.10 |
+|      NA |  50 | 0.05 |
+|      15 |  10 | 0.01 |
+
+- This column is part of the `score` tag in the original xml file.
 
 # Cleaning requirements identified
 
 - Records with missing location data should be removed. These records
   refer to establishments that are run from a private address. There are
   226 such records in the dataset, representing 23% of the total.
+- `rating_value` has a mix of character and numeric values. Look at
+  keeping a single type in the column (perhaps split data into 2
+  columns, one for numeric rating and one for rating code.)
+- Add the following fields to metadata since the same value is used for
+  every record: `local_authority_code`, `local_authority_name`,
+  `local_authority_web_site`, `local_authority_email_address`.
+- Append `_score` to the following columns: `hygiene`, `structural`,
+  `confidence_in_management` (abbreviated to `management`)
