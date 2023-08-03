@@ -32,7 +32,6 @@ knitr::opts_knit$set(
 
 Load the packages to be used for this project.
 ```{r load-packages, echo=TRUE}
-library(here)
 library(knitr)
 library(sf)
 library(mapview)
@@ -283,7 +282,7 @@ fhr_data %>%
   - **221504**: The postcode here is correct, but the lat/long coordinates do not match the postcode. We can fix this for the analysis.
   
 ## `post_code`
-- There are `r length(unique(fhr_data$post_codes))` unique values.
+- There are `r length(unique(fhr_data$post_code))` unique values.
 - All postcodes in Waverley should start with the characters "GU". Let's check if this is true.
 ```{r postcode-check}
 # Check that all postcodes start with "GU"
