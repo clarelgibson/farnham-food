@@ -20,6 +20,10 @@ Clare Gibson
   - [`local_authority_web_site`](#local_authority_web_site)
   - [`local_authority_email_address`](#local_authority_email_address)
   - [`hygiene`](#hygiene)
+  - [`structural`](#structural)
+  - [`confidence_in_management`](#confidence_in_management)
+  - [`scheme_type`](#scheme_type)
+  - [`new_rating_pending`](#new_rating_pending)
 - [Cleaning requirements identified](#cleaning-requirements-identified)
 
 # Introduction
@@ -231,6 +235,50 @@ There are 13 unique values.
 |      15 |  10 | 0.01 |
 
 - This column is part of the `score` tag in the original xml file.
+
+## `structural`
+
+- There are 6 unique values.
+
+| structural |   n | prop |
+|-----------:|----:|-----:|
+|          0 | 458 | 0.47 |
+|          5 | 358 | 0.36 |
+|         10 |  95 | 0.10 |
+|         NA |  50 | 0.05 |
+|         15 |  20 | 0.02 |
+|         20 |   1 | 0.00 |
+
+- This column is part of the `score` tag in the original xml file.
+
+## `confidence_in_management`
+
+- There are 5 unique values.
+
+| confidence_in_management |   n | prop |
+|-------------------------:|----:|-----:|
+|                        0 | 506 | 0.52 |
+|                        5 | 311 | 0.32 |
+|                       10 | 102 | 0.10 |
+|                       NA |  50 | 0.05 |
+|                       20 |  13 | 0.01 |
+
+- This column is part of the `score` tag in the original xml file.
+
+## `scheme_type`
+
+- There is 1 unique value.
+- This should be treated as metadata since the same value applies to
+  every record.
+
+## `new_rating_pending`
+
+- There are 2 unique values.
+
+| new_rating_pending |   n | prop |
+|:-------------------|----:|-----:|
+| FALSE              | 973 | 0.99 |
+| TRUE               |   9 | 0.01 |
 
 # Cleaning requirements identified
 
