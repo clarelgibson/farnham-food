@@ -1,10 +1,13 @@
 ---
 title: "Farnham Food Hygiene Ratings"
+subtitle: "Data Profiling"
 author: "Clare Gibson"
 output:
-  github_document:
+  html_document:
+    theme: cosmo
     toc: true
-    toc_depth: 2
+    toc_depth: 4
+    toc_float: true
 ---
 
 # Introduction
@@ -31,12 +34,13 @@ Load the packages to be used for this project.
 ```{r load-packages, echo=TRUE}
 library(here)
 library(knitr)
-library(ggplot2)
+library(sf)
+library(mapview)
 ```
 
 # Load the data
 
-The data for profiling is contained in the `fhr` object created in the [`2-prep-data.R`](script/2-prep-data.R) script.
+The data for profiling is contained in the `fhr_data` object created in the [`2-prep-data.R`](script/2-prep-data.R) script.
 
 ```{r load-data}
 # Load data
@@ -115,6 +119,17 @@ values_rating_value %>%
   kable()
 ```
 - Note the mix of character and numeric. Could we remove character?
+- Let's also plot a histogram of the numeric values to see the distribution.
+```{r rating-value-hist}
+# Histogram of rating values
+fhr_data %>% 
+  select(rating_value) %>% 
+  filter(!(rating_value %in% c("Exempt", "AwaitingInspection"))) %>%
+  type_convert() %>% 
+  pull(rating_value) %>% 
+  hist(main = "Distribution of rating values",
+       col = "#FF4F5C")
+```
 
 ## `rating_key`
 - There are `r length(unique(fhr_data$rating_key))` unique values.
@@ -173,8 +188,138 @@ values_hygiene %>%
 ```
 - This column is part of the `score` tag in the original xml file.
 
+## `structural`
+- There are `r length(unique(fhr_data$structural))` unique values.
+```{r structural-profile}
+# What are the unique values?
+values_structural <- fhr_data %>% 
+  count(structural) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_structural %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+- This column is part of the `score` tag in the original xml file.
+
+## `confidence_in_management`
+- There are `r length(unique(fhr_data$confidence_in_management))` unique values.
+```{r management-profile}
+# What are the unique values?
+values_management <- fhr_data %>% 
+  count(confidence_in_management) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_management %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+- This column is part of the `score` tag in the original xml file.
+
+## `scheme_type`
+- There is `r length(unique(fhr_data$scheme_type))` unique value.
+- This should be treated as metadata since the same value applies to every record.
+
+## `new_rating_pending`
+- There are `r length(unique(fhr_data$new_rating_pending))` unique values.
+```{r pending-profile}
+# What are the unique values?
+values_pending <- fhr_data %>% 
+  count(new_rating_pending) %>% 
+  arrange(desc(n)) 
+
+# Table of values
+values_pending %>% 
+  ungroup() %>% 
+  mutate(prop = round(n/sum(n),2)) %>% 
+  kable()
+```
+
+## `longitude` and `latitude`
+- There are `r length(unique(fhr_data$longitude))` unique values of longitude.
+- There are `r length(unique(fhr_data$latitude))` unique values of latitude.
+- Summary of `longitude`
+```{r longitude-profile}
+# Summary of values
+summary(fhr_data$longitude)
+```
+- Summary of `latitude`
+```{r latitude-profile}
+# Summary of values
+summary(fhr_data$latitude)
+```
+- Let's plot the points on a map to ensure they are all valid locations within Waverley.
+```{r plot-lat-long}
+# Plot the coordinates on a map
+fhr_data %>% 
+  filter(!is.na(longitude)) %>% 
+  st_as_sf(coords = c("longitude", "latitude"),
+           crs = 4326) %>% 
+  mapview()
+```
+
+- Most of the points appear to be in Waverley Borough, which covers the towns of Farnham, Godalming, Haslemere and Cranleigh. However, there are 2 points that appear to outside of Waverley. Clicking on the points reveals more data and we can discover that they refer to `fhrsid` **221504** and **182877**. Let's check out the details of these two records.
+```{r review-location-outliers}
+# View the address details for the 2 points that appear to be outside of Waverley
+fhr_data %>% 
+  select(fhrsid,
+         business_name,
+         business_type,
+         longitude,
+         latitude,
+         address_line1,
+         address_line2,
+         address_line3,
+         address_line4,
+         post_code) %>% 
+  filter(fhrsid %in% c(221504, 182877)) %>% 
+  kable()
+```
+  - **187877**: The postcode has been entered incorrectly, and thus the lat/long data is incorrect. We can fix this for the analysis.
+  - **221504**: The postcode here is correct, but the lat/long coordinates do not match the postcode. We can fix this for the analysis.
+  
+## `post_code`
+- There are `r length(unique(fhr_data$post_codes))` unique values.
+- All postcodes in Waverley should start with the characters "GU". Let's check if this is true.
+```{r postcode-check}
+# Check that all postcodes start with "GU"
+fhr_data %>% 
+  select(post_code) %>% 
+  distinct() %>% 
+  filter(!(grepl(pattern = "^GU",
+                 x = post_code)))
+```
+- There are some records where `post_code` is null. This is ok. We'll be excluding those records anyway.
+- There are some records where postcode does not start with "GU". Let's see more details about those records.
+```{r postcode-outliers}
+# Which addresses have non GU postcodes?
+fhr_data %>% 
+  filter(grepl("^RH", post_code)) %>% 
+  select(fhrsid,
+         business_name,
+         longitude,
+         latitude,
+         address_line1,
+         address_line2,
+         address_line3,
+         address_line4,
+         post_code) %>% 
+  kable()
+```
+- According to the front end [FHR website](https://ratings.food.gov.uk) both of these establishments are covered by Waverley so no need to make any changes.
+  
+## `fhrs_establishment_id`
+- There is `r length(unique(fhr_data$fhrs_establishment_id))` unique value.
+- This should be treated as metadata since the same value applies to every record.
+
 # Cleaning requirements identified
 - Records with missing location data should be removed. These records refer to establishments that are run from a private address. There are `r fhr_data %>% filter(is.na(longitude)) %>% nrow()` such records in the dataset, representing `r round(((fhr_data %>% filter(is.na(longitude)) %>% nrow()) / nrow(fhr_data))*100)`% of the total.
 - `rating_value` has a mix of character and numeric values. Look at keeping a single type in the column (perhaps split data into 2 columns, one for numeric rating and one for rating code.)
-- Add the following fields to metadata since the same value is used for every record: `local_authority_code`, `local_authority_name`, `local_authority_web_site`, `local_authority_email_address`.
-- Append `_score` to the following columns: `hygiene`, `structural`, `confidence_in_management` (abbreviated to `management`)
+- Add the following fields to metadata since the same value is used for every record: `local_authority_code`, `local_authority_name`, `local_authority_web_site`, `local_authority_email_address`, `scheme_type`.
+- Append `_score` to the following columns: `hygiene`, `structural`, `confidence_in_management` (abbreviated to `management`).
+- `fhrsid` 187877 - the correct postcode for this record should be GU27 2BP. Lat/Long should be 51.0923509197681, -0.7060200868816853 (source: Google Maps using address details).
+ - `fhrsid` 221504 - correct lat/long values are 51.21564332626035, -0.8021015970813663 (source: Google Maps using postcode).
