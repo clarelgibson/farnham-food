@@ -46,6 +46,3 @@ fhr_data <- fhr_df %>%
   # fix the types and headers
   type_convert() %>% 
   clean_names()
-
-# SAVE DATA ####################################################################
-#saveRDS()
