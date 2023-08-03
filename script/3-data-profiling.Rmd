@@ -32,6 +32,7 @@ knitr::opts_knit$set(
 
 Load the packages to be used for this project.
 ```{r load-packages, echo=TRUE}
+library(here)
 library(knitr)
 library(sf)
 library(mapview)

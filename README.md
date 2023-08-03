@@ -6,6 +6,8 @@ An exploration of food establishments in Farnham, Surrey, using geospatial analy
 ## Getting started
 ### Data
 ### Packages
+### Data Profiling
+My exploratory analysis and profiling of the source data can be found [here](https://rpubs.com/SurreyDataGirl/farnham-food).
 
 ## Author
 - [Clare Gibson](https://www.surreydatagirl.com) - [surreydatagirl@gmail.com](mailto:surreydatagirl.com)
