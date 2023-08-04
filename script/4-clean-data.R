@@ -2,21 +2,25 @@
 # This script cleans the data according to the findings of the data profiling
 
 # SETUP ########################################################################
+# > Packages ===================================================================
+library(here)
+
 # > Scripts ====================================================================
 source(here("script/2-prep-data.R"))
 
 # CLEAN DATA ###################################################################
+# > FHR ========================================================================
 fhr <- fhr_data %>% 
   # Remove records with missing location data
   filter(!is.na(longitude)) %>% 
   # clean rating value
   mutate(rating_value = as.numeric(rating_value)) %>% 
+  # Remove records with missing rating values
+  filter(!is.na(rating_value)) %>% 
   # recode rating key
   mutate(
     rating_key = case_when(
-      grepl("awaitinginspection", rating_key) ~ "Awaiting inspection",
-      grepl("exempt", rating_key) ~ "Exempt from rating",
-      grepl("0", rating_key) ~ "o - urgent improvement is required",
+      grepl("0", rating_key) ~ "0 - urgent improvement is required",
       grepl("1", rating_key) ~ "1 - major improvement is required",
       grepl("2", rating_key) ~ "2 - some improvement is required",
       grepl("3", rating_key) ~ "3 - hygiene standards are generally satisfactory",
@@ -46,3 +50,19 @@ fhr <- fhr_data %>%
       TRUE ~ longitude
     )
   )
+
+# > FHR Plus SF ================================================================
+fhr_as_sf <- st_as_sf(fhr,
+                   coords = c("longitude", "latitude"),
+                   crs = 27700)
+
+fhr_sf <- st_join(
+  fhr_as_sf,
+  wd_src,
+  join = st_intersects
+)
+
+# > FHR Waffle =================================================================
+fhr_waffle <- fhr %>% 
+  select(business_type,
+         rating_value)

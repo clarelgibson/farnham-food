@@ -6,7 +6,8 @@ This project sets out to explore food hygiene ratings in Farnham and the wider b
 
 ## Getting started
 ### Data
-The source data used for this project can be downloaded [here](https://drive.google.com/file/d/1u6Qu3k99K0SbU-35ohsdppoV7PKm3bRY/view?usp=share_link). The original source of the data is the UK FSA, and can be downloaded [here](https://ratings.food.gov.uk/OpenDataFiles/FHRS314en-GB.xml). If downloading from source be aware that the data may idffer from that used in this project since the ratings are refreshed on a daily basis.
+* The source data used for this project can be downloaded [here](https://drive.google.com/file/d/1u6Qu3k99K0SbU-35ohsdppoV7PKm3bRY/view?usp=share_link). The original source of the data is the UK FSA, and can be downloaded [here](https://ratings.food.gov.uk/OpenDataFiles/FHRS314en-GB.xml). If downloading from source be aware that the data may idffer from that used in this project since the ratings are refreshed on a daily basis.
+* In addition, this project makes use of the [Local Authority Districts (May 2023) Boundaries UK BFC](https://geoportal.statistics.gov.uk/datasets/ons::local-authority-districts-may-2023-boundaries-uk-bfc/) shapefile.
 
 Note that some of the establishments in the dataset have no location data because they are run from a private address. These establishments have been excluded from my analysis.
 
