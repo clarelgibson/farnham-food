@@ -29,40 +29,51 @@ fhr <- fhr_data %>%
       TRUE ~ rating_key
     )
   ) %>% 
+  # add rating indicators
+  mutate(
+    rating_indicator_inc_zero = case_when(
+      rating_value >= 3 ~ "Satisfactory",
+      rating_value >= 1 ~ "Unsatisfactory",
+      rating_value == 0 ~ "Rating 0"
+    ),
+    rating_indicator_binary = case_when(
+      rating_value >= 3 ~ "Satisfactory",
+      rating_value >= 0 ~ "Unsatisfactory"
+    )
+  ) %>% 
   # append score to score columns
   rename(hygiene_score = hygiene,
          structural_score = structural,
          management_score = confidence_in_management) %>% 
-  # correct location errors identified in profiling
-  mutate(
-    post_code = case_when(
-      fhrsid == 187877 ~ "GU27 2BP",
-      TRUE ~ post_code
-    ),
-    latitude = case_when(
-      fhrsid == 187877 ~ round(51.0923509197681,7),
-      fhrsid == 221501 ~ round(51.21564332626035,7),
-      TRUE ~ latitude
-    ),
-    longitude = case_when(
-      fhrsid == 187877 ~ round(-0.7060200868816853,7),
-      fhrsid == 221501 ~ round(-0.8021015970813663,7),
-      TRUE ~ longitude
-    )
-  )
-
-# > FHR Plus SF ================================================================
-fhr_as_sf <- st_as_sf(fhr,
-                   coords = c("longitude", "latitude"),
-                   crs = 27700)
-
-fhr_sf <- st_join(
-  fhr_as_sf,
-  wd_src,
-  join = st_intersects
-)
+  # join town data from geocoded data
+  left_join(select(fhr_geo,
+                   fhrsid,
+                   town)) %>% 
+  # keep Farnham only
+  filter(town == "Farnham")
 
 # > FHR Waffle =================================================================
 fhr_waffle <- fhr %>% 
+  # select dimensions to measure on
   select(business_type,
-         rating_value)
+         rating_indicator_binary) %>% 
+  arrange(business_type,
+          rating_indicator_binary) %>% 
+  # add count by business type
+  group_by(business_type) %>% 
+  mutate(count_business_type = n()) %>% 
+  ungroup() %>% 
+  # add count of rating by business type
+  group_by(business_type,
+           rating_indicator_binary) %>% 
+  mutate(count_rating = n(),
+         pct_rating = count_rating / count_business_type) %>% 
+  ungroup() %>% 
+  distinct() %>% 
+  # keep only the satisfactory rows
+  filter(rating_indicator_binary == "Satisfactory") %>% 
+  select(business_type,
+         total_businesses = count_business_type,
+         count_satisfactory = count_rating,
+         pct_satisfactory = pct_rating)
+  

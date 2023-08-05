@@ -10,3 +10,4 @@ source(here("script/4-clean-data.R"))
 
 # EXPORT #######################################################################
 write_csv(fhr, here("data/cln/fhr.csv"))
+write_csv(fhr_waffle, here("data/cln/fhr_waffle.csv"))

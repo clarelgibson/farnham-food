@@ -21,3 +21,6 @@ fhr_xml <- as_list(read_xml(fhr_path))
 
 # Read in the shape files
 wd_src <- read_sf(wd_path)
+
+# Read in geocoded FHR data
+fhr_geo <- readRDS(here("data/src/fhr_geo.rds"))

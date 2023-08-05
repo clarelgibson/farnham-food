@@ -62,6 +62,17 @@
       ],
       "Hash": "38082d362d317745fb932e13956dccbb"
     },
+    "PostcodesioR": {
+      "Package": "PostcodesioR",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "httr"
+      ],
+      "Hash": "6fd5043a1023796198ad74afe58a1eee"
+    },
     "R6": {
       "Package": "R6",
       "Version": "2.5.1",
@@ -604,6 +615,21 @@
         "utils"
       ],
       "Hash": "838602f54e32c1a0f8cc80708cefcefa"
+    },
+    "httr": {
+      "Package": "httr",
+      "Version": "1.4.6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "R6",
+        "curl",
+        "jsonlite",
+        "mime",
+        "openssl"
+      ],
+      "Hash": "7e5e3cbd2a7bc07880c94e22348fb661"
     },
     "isoband": {
       "Package": "isoband",
