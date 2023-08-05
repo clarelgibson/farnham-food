@@ -25,3 +25,4 @@ This project is licensed under the CC0 1.0 Universal licence. See the [LICENSE](
 
 ## Acknowledgements
 - [This article](https://urbandatapalette.com/post/2021-03-xml-dataframe-r/) was a tremendous help when converting the XML data to an R dataframe.
+- [Waffle Charts](https://www.vizwiz.com/2019/09/waffle-chart.html)
