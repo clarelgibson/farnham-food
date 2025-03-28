@@ -14,13 +14,9 @@ library(sf)
 # READ DATA ####################################################################
 fhr_path <- here("data/src/FHRS314en-GB.xml")
 lad_path <- here("data/src/shape-lad/LAD_MAY_2023_UK_BFC_V2.shp")
-wd_path  <- here("data/src/shape-wd/WD_MAY_2023_UK_BFC.shp")
 
 # Read in the XML as an R list
 fhr_xml <- as_list(read_xml(fhr_path))
-
-# Read in the shape files
-wd_src <- read_sf(wd_path)
 
 # Read in geocoded FHR data
 fhr_geo <- readRDS(here("data/src/fhr_geo.rds"))
